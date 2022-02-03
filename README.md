@@ -29,7 +29,7 @@
 **1 - kreatinc/app/Providers/FacebookRepository.php**
 **2 - kreatinc/app/Http/Controllers/SocialController.php**
 
-**I creat 3 model**
+**I creat 3 model**_
     **User**
     **Post**
     **Page**
