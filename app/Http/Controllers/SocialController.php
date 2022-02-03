@@ -21,118 +21,67 @@ class SocialController extends Controller
     public function __construct()
     {
         Log::info("we are in socialController construct");
-        //$this->middleware('auth');
         $this->facebook = new FacebookRepository();
     }
 
+
+    // redirect to api fb for get token access
     public function redirectToProvider()
     {
         return redirect($this->facebook->redirectTo());
     }
 
+
+    // recovry  token access from fb and set auth session
     public function handleProviderCallback()
     {
         
         if (request('error') == 'access_denied')
-            //handle error
+
             Log::error("we have error access_denied ");
 
-            //$accessToken = $this->facebook->handleCallback();
+
             $data= $this->facebook->handleCallback();
-            //if(!$data)
-            //
+
             Log::info("we have acceess ");
          
-         //echo($accessToken);
+
          
-         //var_dump($data);
-         
-        $user=new User();
-        $user->name=            $data['user_Fname']." ". $data['user_Lname'];
-        $user->email=           $data['user_email'];
-        $user->password=        Hash::make($data['user_id']);
-        $user->token=           $data['user_accessToken'];
-        $user->facebook_app_id= $data['user_id'];
-        $user->picture=         $data['user_picture'];
 
 
-         //Auth::attempt($user);
-         
-         $credentials = ["email"=>$user->email,"password"=>$data['user_id']];//$request->only('email', 'password');
 
-        if (Auth::attempt($credentials)) {}
-        else
+            // set Authentification current user data
+            $user=new User();
+            $user->name=            $data['user_Fname']." ". $data['user_Lname'];
+            $user->email=           $data['user_email'];
+            $user->password=        Hash::make($data['user_id']);
+            $user->token=           $data['user_accessToken'];
+            $user->facebook_app_id= $data['user_id'];
+            $user->picture=         $data['user_picture'];
+
+
+
+            // if user exist set auth else created (remember user) save data in database
+           $credentials = ["email"=>$user->email,"password"=>$data['user_id']];
+
+           if (Auth::attempt($credentials)) {}
+           else
             Auth::login($user,true);
-            
-            
-            
-        
-        $this->goToHomePage();
-        
-        //return redirect()->route('home');
-        
-        //Auth::login($user,true);
-         
-        //echo("we have cnx");
-        
-        //return view('home');
-         
-         
-         
-         
-         
-         
-         
-        $pages=$this->facebook->getPages($user->token);
-        // var_dump($pages);
-         
-        // access_token 
-        // id
-        // name
-        // image
-        $collection=[];
-        foreach ($pages as $item)
-        {
-            $page=new Page();
-            $page->id=$item["id"];
-            $page->access_token=$item["access_token"];
-            $page->name=$item["name"];
-            $page->image=$item["image"];
-            
-            array_push($collection,$page);
-            
-        }
-            
+            // after login go to page home and show liste pages
+            $this->goToHomePage();
 
-    
-        
-
-        
-        return view('home',['pages' => $collection]);
-        //use token to get facebook pages
     }
     
     
     
-    //,$token_page
+    // this function show all posts by page post published and not published 'schedule'
     public function goToPostIndex($id,$tokenPage)
     {
         $token=Auth::user()->token;
-        
-        
-        
-        
-        //$token="EAAG8F1SVE2kBAK3RlyJilyqhLprbZAqDuAFsrtAHfLZCRPWhIHz99LHLNCQ4pLIbtJ9ZBKW11z3ZAfZC2VOixYlKC5mrVWuMsnG9RGjuCBHP7lwpEaxIuYFoVFHaTGtXvvOsdccimQZCZBaGfop2muCZANZBpvuL2yFvtzzBRslus230ynYjstlVZBZBOTOW6DkzcWwLn8CASxPVwZDZD";
+        // get data by id page
         $data=$this->facebook->getPostByPageId($token,$id,$tokenPage);
         
- 
-        
-        
-        
-        
-        
-        
-        
+        // prepare data
         $collection=[];
         foreach ($data as $item)
         {
@@ -162,13 +111,9 @@ class SocialController extends Controller
             array_push($collection,$post);
             
         }
-        
-        //return response()->json(["data"=>$collection]); 
+
         return View("post",['posts'=>$collection,"idpage"=>$id,"tokenPage"=>$tokenPage]);
-        
-      //  return response()->json(["data"=>$data]);
-        //var_dump($data);
-        return View("post");
+
     }
     
     
@@ -194,18 +139,20 @@ class SocialController extends Controller
         return view('home',['pages' => $collection]);
     }
     
-      
+
+    // publish post
     public function savePost(Request $request)
     {
-
-        //  require validation data
-
+        // recovry data from requet
+        // attention validation data
 
         $isSchedule=$request->inlineCheckbox1;
         $description=$request->description;
         $date=$request->dateSchedule;
         $tokenPage=$request->tokenPage;
         $accountId  =$request->idpage;
+
+
         $images=(isset($request->fileUpload))?$request->fileUpload:[];
 
         $data=[];
@@ -220,21 +167,12 @@ class SocialController extends Controller
             $data = ['message' => $description];
 
 
-        //send data
-        //, , )
-        /*
-         * $accountId       ---> id page
-         * $accessToken     ---> token page user ??
-         * $content         ---> data you want to send
-         */
-
         $content    =$data;
 
         $this->facebook->post($accountId,$tokenPage,$content,$images);
-        
+
+
+        // after publish post retourn to lists post
         return back();
-        
-
-
     }
 }
