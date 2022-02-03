@@ -24,16 +24,16 @@
 
 ## About code
 
-**you find the important code  in two files**
+**you find the important code  in two files**<br/>
 
-**1 - kreatinc/app/Providers/FacebookRepository.php**
-**2 - kreatinc/app/Http/Controllers/SocialController.php**
+**1 - kreatinc/app/Providers/FacebookRepository.php**<br/>
+**2 - kreatinc/app/Http/Controllers/SocialController.php**<br/>
 
-**I creat 3 model**_
-    **User**
-    **Post**
-    **Page**
-**just the user info saved in database All data recovred from GRAPH API FB** 
+**I creat 3 model**<br/>
+    **User**<br/>
+    **Post**<br/>
+    **Page**<br/>
+**just the user info saved in database All data recovred from GRAPH API FB** <br/>
 
 ##  resource used
 
